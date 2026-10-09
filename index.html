@@ -37,6 +37,13 @@ section{max-width:1250px;margin:auto;padding:65px 5%}
 .category-link{display:block;background:#6b1829;color:#fff;text-decoration:none;text-align:center;padding:16px 10px;border-radius:14px;font-weight:700;border:1px solid #ead9c9;box-shadow:0 5px 14px rgba(107,24,41,.12)}
 .category-link:focus,.category-link:hover{background:#8a1738}
 @media(min-width:700px){.category-links{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* Tap a product photo to view it large */
+.product img{cursor:zoom-in}
+#photo-lightbox{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:18px}
+#photo-lightbox.open{display:flex}
+#photo-lightbox img{max-width:100%;max-height:88vh;width:auto;height:auto;object-fit:contain;border-radius:8px;box-shadow:0 8px 35px rgba(0,0,0,.45)}
+#photo-lightbox .photo-close{position:absolute;top:12px;right:16px;border:0;border-radius:50%;width:44px;height:44px;background:#fff;color:#5b1825;font-size:30px;line-height:1;cursor:pointer}
 </style>
 <meta content="index,follow,max-image-preview:large" name="robots"/>
 <meta content="Shivani Boutique" name="author"/>
@@ -245,5 +252,25 @@ section{max-width:1250px;margin:auto;padding:65px 5%}
 </div>
 </section>
 <footer>© 2026 Shivani Boutique • All Rights Reserved</footer>
+
+<div id="photo-lightbox" aria-hidden="true" role="dialog" aria-label="Badi photo">
+  <button class="photo-close" type="button" aria-label="Photo band karein">&times;</button>
+  <img alt="" src="">
+</div>
+<script>
+(function(){
+  var box=document.getElementById('photo-lightbox');
+  if(!box) return;
+  var big=box.querySelector('img');
+  function closePhoto(){box.classList.remove('open');box.setAttribute('aria-hidden','true');big.removeAttribute('src');document.body.style.overflow='';}
+  document.addEventListener('click',function(e){
+    var img=e.target.closest('.product img');
+    if(img){e.preventDefault();big.src=img.currentSrc||img.src;big.alt=img.alt||'Shivani Boutique dress';box.classList.add('open');box.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';}
+  });
+  box.querySelector('.photo-close').addEventListener('click',closePhoto);
+  box.addEventListener('click',function(e){if(e.target===box) closePhoto();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape') closePhoto();});
+})();
+</script>
 </body>
 </html>
