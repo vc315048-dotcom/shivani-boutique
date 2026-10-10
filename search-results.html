@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>Shivani Boutique | Designer Dresses, Blouses, Frocks &amp; Ethnic Wear in Hyderabad</title>
+<title>Search Designs | Shivani Boutique Hyderabad</title>
 <meta content="Shivani Boutique in Hyderabad — designer blouses, dresses, frocks and ethnic wear. Explore our boutique collection and contact us for India, USA and international orders on WhatsApp." name="description"/>
 <link href="https://shivaniboutiquevercelgoogleverify.vercel.app/" rel="canonical"/>
 <meta content="Shivani Boutique" property="og:site_name"/>
@@ -257,34 +257,25 @@ section{max-width:1250px;margin:auto;padding:65px 5%}
  const input=document.getElementById('collection-search');
  const message=document.getElementById('search-message');
  const cards=Array.from(document.querySelectorAll('#collection .product'));
- if(!input)return;
- function normalize(v){return (v||'').toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
- function filterCards(q){
-   let shown=0;
+ function norm(v){return (v||'').toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
+ const params=new URLSearchParams(window.location.search);
+ const initial=params.get('q')||'';
+ if(input)input.value=initial;
+ const heading=document.querySelector('section#collection h2, #collection .section-title, #collection h1');
+ if(heading)heading.textContent=initial?'Search results for “'+initial+'”':'Search results';
+ function apply(){
+   const q=norm(input?input.value:initial);let shown=0;
    cards.forEach(function(card){
-     const text=normalize(card.innerText+' '+Array.from(card.querySelectorAll('img')).map(function(img){return img.alt||'';}).join(' '));
-     const match=!q||text.includes(q);
-     card.style.display=match?'':'none'; if(match)shown++;
+     const imgs=Array.from(card.querySelectorAll('img')).map(function(im){return (im.alt||'')+' '+(im.title||'');}).join(' ');
+     const text=norm((card.innerText||'')+' '+imgs);
+     const ok=!q||text.includes(q);card.style.display=ok?'':'none';if(ok)shown++;
    });
-   if(message)message.textContent=q?(shown?shown+' design mil gaye':'Is naam ka design homepage par nahi mila. Search results khol rahe hain…'):'Apni pasand ka design search karein';
-   return shown;
+   if(message)message.textContent=q?(shown?shown+' design mil gaye':'Is naam ka design abhi nahi mila. Dusra naam try karein.'):'Apni pasand ka design search karein';
+   if(heading)heading.textContent=q?'Search results for “'+(input?input.value:initial)+'”':'Search results';
  }
- function routeSearch(){
-   const raw=(input.value||'').trim();
-   if(!raw)return;
-   const q=normalize(raw);
-   let target='search-results.html?q='+encodeURIComponent(raw);
-   if(/\b(blouse|blouses)\b/.test(q)) target='designer-blouses.html';
-   else if(/\b(ethnic|saree|sarees|traditional|salwar|suit|suits)\b/.test(q)) target='ethnic-wear.html';
-   else if(/\b(kid|kids|child|children|baby|babies)\b/.test(q)) target='kids-dresses.html';
-   else if(/\b(frock|frocks|gown|gowns)\b/.test(q)) target='frocks.html';
-   // Tops and any other product term get their own results page, with the term preserved.
-   window.location.assign(new URL(target, window.location.href).href);
- }
- input.addEventListener('input',function(){filterCards(normalize(input.value));});
- input.addEventListener('keydown',function(e){if(e.key==='Enter'||e.keyCode===13){e.preventDefault();routeSearch();}});
- input.addEventListener('search',routeSearch);
- input.addEventListener('change',function(e){if(e && e.detail && e.detail.submit)routeSearch();});
+ function updateUrl(){const val=(input?input.value:'').trim();const u=new URL(window.location.href);if(val)u.searchParams.set('q',val);else u.searchParams.delete('q');window.history.replaceState({},'',u);apply();}
+ if(input){input.addEventListener('input',updateUrl);input.addEventListener('keydown',function(e){if(e.key==='Enter'||e.keyCode===13){e.preventDefault();updateUrl();input.blur();}});input.addEventListener('search',updateUrl);}
+ apply();
 })();
 </script>
 
