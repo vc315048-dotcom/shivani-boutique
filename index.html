@@ -263,6 +263,20 @@ section{max-width:1250px;margin:auto;padding:65px 5%}
   cards.forEach(function(card){const match=card.innerText.toLocaleLowerCase().includes(q)||Array.from(card.querySelectorAll('img')).some(function(img){return (img.alt||'').toLocaleLowerCase().includes(q)});card.style.display=match?'':'none';if(match)shown++;});
   message.textContent=q?(shown?shown+' design mil gaye':'Koi design nahi mila. Dusra naam try karein.'):'Apni pasand ka design search karein';
  });
+ // Enter opens the matching collection page and clears the search UI during navigation.
+ input.addEventListener('keydown',function(e){
+  if(e.key!=='Enter')return;
+  e.preventDefault();
+  const q=input.value.trim().toLocaleLowerCase();
+  if(!q)return;
+  let target='';
+  if(/blouse|blouses/.test(q)) target='designer-blouses.html';
+  else if(/ethnic|kurti|kurta|saree|traditional/.test(q)) target='ethnic-wear.html';
+  else if(/kid|kids|child|children/.test(q)) target='kids-dresses.html';
+  else if(/frock|frocks/.test(q)) target='frocks.html';
+  if(target){input.value=''; if(message)message.textContent=''; window.location.href=target;}
+  else {const first=cards.find(function(card){return card.style.display!=='none';});if(first){first.scrollIntoView({behavior:'smooth',block:'center'});input.blur();}}
+ });
 })();
 </script>
 
