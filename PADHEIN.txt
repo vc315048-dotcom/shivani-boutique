@@ -1,0 +1,8 @@
+Shivani Boutique website package
+
+1. index.html homepage hai.
+2. product-photos folder ki tasveerein homepage ke naye product cards mein jodi gayi hain.
+3. Tasveeron ko edit nahi kiya gaya; Vaibhavi Boutique wali photos original roop mein rakhi gayi hain.
+4. Website par upload karte waqt index.html aur product-photos folder ko saath rakhein. Sirf index.html alag upload karne se nayi photos nahi dikhenगी.
+5. Search test: Blouse, Lehenga, Top, Kids Dress, Frock. Har photo ka category/search text product card mein diya hai.
+6. Yeh local package hai; GitHub/Vercel par upload ya live publish abhi nahi kiya gaya hai.
