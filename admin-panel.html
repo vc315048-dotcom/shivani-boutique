@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shivani Boutique Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{font-family:Arial,sans-serif;background:#f7f3f0;margin:0;padding:18px;color:#29201e}
+.card{max-width:520px;margin:25px auto;background:white;padding:22px;border-radius:16px;box-shadow:0 4px 20px #0001}
+h2{text-align:center;color:#9b174c}
+input,button{box-sizing:border-box;width:100%;padding:13px;margin:8px 0;border-radius:8px;font-size:16px}
+input{border:1px solid #ccc}
+button{background:#9b174c;color:white;border:0;font-weight:bold}
+.secondary{background:#555}
+.item{border:1px solid #ddd;border-radius:10px;padding:10px;margin:12px 0;overflow-wrap:anywhere}
+img{max-width:100%;max-height:260px;object-fit:contain;display:block;margin:auto}
+#panel{display:none}
+#status{overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<div class="card">
+<h2>Shivani Boutique</h2>
+<p style="text-align:center">Admin Panel — केवल आपके लिए</p>
+
+<div id="login">
+<label>Email</label>
+<input id="email" type="email" placeholder="Admin email" autocomplete="username">
+<label>Password</label>
+<input id="password" type="password" placeholder="Admin password" autocomplete="current-password">
+<button id="loginBtn">Login</button>
+</div>
+
+<div id="panel">
+<h3>नया कपड़ा अपलोड करें</h3>
+<input id="photo" type="file" accept="image/*">
+<button id="uploadBtn">फोटो अपलोड करें</button>
+<hr>
+<h3>अपलोड की गई फोटो</h3>
+<button id="refreshBtn" class="secondary">फोटो लिस्ट रिफ्रेश करें</button>
+<div id="photos"></div>
+<button id="logoutBtn" class="secondary">Logout</button>
+</div>
+<p id="status" role="status"></p>
+</div>
+
+<script>
+const SUPABASE_URL = "https://wtwtimoawkixvudbnapz.supabase.co";
+const SUPABASE_KEY = ".sb_publishable_31rJrw5WiP5D6fpFBEMk5Q_ZuPVTH4Y";
+const BUCKET = "boutique-photos";
+
+const client = window.supabase.createClient(
+  SUPABASE_URL, SUPABASE_KEY
+);
+
+const statusBox = document.getElementById("status");
+function message(text){ statusBox.textContent = text; }
+
+async function showPanel(){
+  document.getElementById("login").style.display="none";
+  document.getElementById("panel").style.display="block";
+  await loadPhotos();
+}
+
+document.getElementById("loginBtn").onclick = async () => {
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value;
+  if(!email || !password){message("Email और password भरें।");return;}
+  message("Login हो रहा है...");
+  const {error}=await client.auth.signInWithPassword({email,password});
+  if(error){message("Login नहीं हुआ: "+error.message);return;}
+  message("Login सफल।");
+  await showPanel();
+};
+
+async function loadPhotos(){
+  message("फोटो लोड हो रही हैं...");
+  const {data,error}=await client.storage.from(BUCKET).list("",{
+    limit:100,sortBy:{column:"name",order:"desc"}
+  });
+  if(error){message("फोटो नहीं दिखीं: "+error.message);return;}
+  const container=document.getElementById("photos");
+  container.replaceChildren();
+  data.filter(f=>f.name && !f.name.startsWith(".")).forEach(file=>{
+    const path=file.name;
+    const {data:urlData}=client.storage.from(BUCKET).getPublicUrl(path);
+    const box=document.createElement("div");
+    box.className="item";
+    const img=document.createElement("img");
+    img.src=urlData.publicUrl;
+    img.alt=path;
+    const name=document.createElement("p");
+    name.textContent=path;
+    const del=document.createElement("button");
+    del.textContent="यह फोटो हटाएँ";
+    del.onclick=async()=>{
+      if(!confirm("क्या यह फोटो हटानी है?"))return;
+      const {error}=await client.storage.from(BUCKET).remove([path]);
+      if(error){message("हटाने में समस्या: "+error.message);return;}
+      message("फोटो हट गई।");
+      await loadPhotos();
+    };
+    box.append(img,name,del);
+    container.append(box);
+  });
+  message(data.length+" फाइलें मिलीं।");
+}
+
+document.getElementById("uploadBtn").onclick=async()=>{
+  const file=document.getElementById("photo").files[0];
+  if(!file){message("पहले कपड़े की फोटो चुनें।");return;}
+  if(!file.type.startsWith("image/")){message("कृपया फोटो चुनें।");return;}
+  if(file.size>10*1024*1024){message("फोटो 10 MB से छोटी रखें।");return;}
+  message("फोटो अपलोड हो रही है...");
+  const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+  const path=Date.now()+"-"+safeName;
+  const {error}=await client.storage.from(BUCKET).upload(path,file,{
+    cacheControl:"3600",upsert:false
+  });
+  if(error){message("अपलोड नहीं हुआ: "+error.message);return;}
+  document.getElementById("photo").value="";
+  message("फोटो अपलोड हो गई।");
+  await loadPhotos();
+};
+
+document.getElementById("refreshBtn").onclick=loadPhotos;
+document.getElementById("logoutBtn").onclick=async()=>{
+  await client.auth.signOut();
+  document.getElementById("panel").style.display="none";
+  document.getElementById("login").style.display="block";
+  message("Logout हो गया।");
+};
+
+client.auth.getSession().then(async({data})=>{
+  if(data.session) await showPanel();
+});
+</script>
+</body>
+</html>
