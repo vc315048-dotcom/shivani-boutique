@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shivani Boutique Admin</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fff7f8;
+      margin: 0;
+      padding: 24px;
+    }
+    .panel {
+      max-width: 400px;
+      margin: 50px auto;
+      padding: 24px;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px #0001;
+    }
+    h2 { color: #9b174c; text-align: center; }
+    label { display: block; margin-top: 16px; }
+    input, button {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 8px;
+    }
+    input { border: 1px solid #ccc; }
+    button {
+      background: #9b174c;
+      color: white;
+      border: 0;
+      font-size: 16px;
+    }
+    #status { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h2>Shivani Boutique</h2>
+    <p style="text-align:center">Admin Login</p>
+    <form id="loginForm">
+      <label>Email</label>
+      <input type="email" id="email" required>
+      <label>Password</label>
+      <input type="password" id="password" required>
+      <button type="submit">Login</button>
+    </form>
+    <p id="status"></p>
+  </div>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      document.getElementById('status').textContent =
+        'Login setup pending. Supabase authentication must be connected before use.';
+    });
+  </script>
+</body>
+</html>
